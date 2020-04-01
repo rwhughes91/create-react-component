@@ -21,14 +21,14 @@ if (!fs.existsSync(componentPath)) {
 }
 
 const jsTemplate = `import React from 'react';
-
-import classes from './${name}.module.css'
-
-const ${name} = (props) => {
-  return '';
-};
-
-export default ${name};`;
+  
+  import classes from './${name}.module.css'
+  
+  const ${name} = (props) => {
+    return '';
+  };
+  
+  export default ${name};`;
 
 const cssTemplate = `${name} {}`;
 
