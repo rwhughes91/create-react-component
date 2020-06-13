@@ -3,34 +3,32 @@ const process = require('process');
 const fs = require('fs');
 const path = require('path');
 
-// take in name from command line argument
 const [, , name, location] = process.argv;
 
 let componentPath;
 if (location) {
-  componentPath = path.resolve(path.join(location, name));
+  componentPath = path.resolve(path.join(process.cwd(), location, name));
 } else {
-  componentPath = path.resolve(path.join(name));
+  componentPath = path.resolve(path.join(process.cwd(), name));
 }
 
 const JsFile = path.join(componentPath, `${name}.js`);
-const CssFile = path.join(componentPath, `${name}.css`);
+const CssFile = path.join(componentPath, `${name}.module.css`);
 
 if (!fs.existsSync(componentPath)) {
   fs.mkdirSync(componentPath, { recursive: true });
 }
 
 const jsTemplate = `import React from 'react';
-  
-  import classes from './${name}.module.css'
-  
-  const ${name} = (props) => {
-    return '';
-  };
-  
-  export default ${name};`;
+import classes from './${name}.module.css'
 
-const cssTemplate = `${name} {}`;
+const ${name} = (props) => {
+  return '';
+};
+
+export default ${name};`;
+
+const cssTemplate = `.${name} {}`;
 
 fs.writeFileSync(JsFile, jsTemplate);
 fs.writeFileSync(CssFile, cssTemplate);
