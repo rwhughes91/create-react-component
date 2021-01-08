@@ -3,6 +3,12 @@ const process = require('process');
 const fs = require('fs');
 const path = require('path');
 
+const {
+  ReactTemplate,
+  StylesTemplate,
+  TestTemplate,
+} = require('./templates/index');
+
 const [, , name, location] = process.argv;
 
 let componentPath;
@@ -12,23 +18,33 @@ if (location) {
   componentPath = path.resolve(path.join(process.cwd(), name));
 }
 
-const JsFile = path.join(componentPath, `${name}.js`);
-const CssFile = path.join(componentPath, `${name}.module.css`);
+// const jsFile = path.join(componentPath, `${name}.js`);
+// const cssFile = path.join(componentPath, `${name}.module.css`);
+// const testFile = path.join(componentPath, `${name}.test.js`);
 
 if (!fs.existsSync(componentPath)) {
   fs.mkdirSync(componentPath, { recursive: true });
 }
 
-const jsTemplate = `import React from 'react';
-import classes from './${name}.module.css'
+const reactTemplate = new ReactTemplate(componentPath, name);
+const stylesTemplate = new StylesTemplate(componentPath, name);
+const testTemplate = new TestTemplate(componentPath, name);
 
-const ${name} = (props) => {
-  return '';
-};
+reactTemplate.writeFile();
+stylesTemplate.writeFile();
+testTemplate.writeFile();
 
-export default ${name};`;
+// const jsTemplate = `import React from 'react';
+// import classes from './${name}.module.css'
 
-const cssTemplate = `.${name} {}`;
+// const ${name} = () => {
+//   return '';
+// };
 
-fs.writeFileSync(JsFile, jsTemplate);
-fs.writeFileSync(CssFile, cssTemplate);
+// export default React.memo(${name});`;
+
+// const cssTemplate = `.${name} {}`;
+
+// fs.writeFileSync(jsFile, jsTemplate);
+// fs.writeFileSync(cssFile, cssTemplate);
+// fs.writeFileSync(testFile, '');
