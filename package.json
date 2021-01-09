@@ -9,5 +9,8 @@
   "license": "ISC",
   "bin": {
     "create-react-component": "./index.js"
+  },
+  "dependencies": {
+    "open": "^7.3.1"
   }
 }

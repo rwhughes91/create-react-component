@@ -1,5 +1,5 @@
 const path = require('path');
-const Template = require('./base');
+const Template = require('../Template');
 
 module.exports = class StyleTemplate extends (
   Template

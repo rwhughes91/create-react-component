@@ -2,49 +2,70 @@
 const process = require('process');
 const fs = require('fs');
 const path = require('path');
+const open = require('open');
 
 const {
-  ReactTemplate,
-  StylesTemplate,
-  TestTemplate,
-} = require('./templates/index');
+  ReactController,
+  StyleController,
+  TestController,
+} = require('./controllers/index');
 
 const [, , name, location] = process.argv;
+let configPath = path.resolve('crc.config.json');
 
-let componentPath;
-if (location) {
-  componentPath = path.resolve(path.join(process.cwd(), location, name));
+if (!fs.existsSync(configPath)) {
+  throw new Error('Global file could not be found');
+}
+
+const config = JSON.parse(fs.readFileSync(configPath));
+
+if (name === '--config' || name === '-c') {
+  const args = process.argv.slice(3);
+  if (args[0] === '--open' || args[0] === '-o') {
+    open(configPath);
+  } else {
+    for (const arg of args) {
+      const [key, value] = arg.split('=');
+      if (key !== 'react' && key !== 'style' && key !== 'test') {
+        throw new Error(
+          `You passed the parameter ${key}. Parameter must be react, style, or test.`
+        );
+      }
+      config[key] = value;
+    }
+    fs.writeFileSync(configPath, JSON.stringify(config));
+  }
 } else {
-  componentPath = path.resolve(path.join(process.cwd(), name));
+  let componentPath;
+  if (location) {
+    componentPath = path.resolve(path.join(process.cwd(), location, name));
+  } else {
+    componentPath = path.resolve(path.join(process.cwd(), name));
+  }
+
+  const reactController = new ReactController(
+    config.react,
+    componentPath,
+    name,
+    config
+  );
+  const stylesController = new StyleController(
+    config.style,
+    componentPath,
+    name
+  );
+  const testController = new TestController(
+    config.test,
+    componentPath,
+    name,
+    config
+  );
+
+  if (!fs.existsSync(componentPath)) {
+    fs.mkdirSync(componentPath, { recursive: true });
+  }
+
+  reactController.template.writeFile();
+  stylesController.template.writeFile();
+  testController.template.writeFile();
 }
-
-// const jsFile = path.join(componentPath, `${name}.js`);
-// const cssFile = path.join(componentPath, `${name}.module.css`);
-// const testFile = path.join(componentPath, `${name}.test.js`);
-
-if (!fs.existsSync(componentPath)) {
-  fs.mkdirSync(componentPath, { recursive: true });
-}
-
-const reactTemplate = new ReactTemplate(componentPath, name);
-const stylesTemplate = new StylesTemplate(componentPath, name);
-const testTemplate = new TestTemplate(componentPath, name);
-
-reactTemplate.writeFile();
-stylesTemplate.writeFile();
-testTemplate.writeFile();
-
-// const jsTemplate = `import React from 'react';
-// import classes from './${name}.module.css'
-
-// const ${name} = () => {
-//   return '';
-// };
-
-// export default React.memo(${name});`;
-
-// const cssTemplate = `.${name} {}`;
-
-// fs.writeFileSync(jsFile, jsTemplate);
-// fs.writeFileSync(cssFile, cssTemplate);
-// fs.writeFileSync(testFile, '');
